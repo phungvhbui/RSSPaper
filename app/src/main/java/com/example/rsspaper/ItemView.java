@@ -1,13 +1,13 @@
 package com.example.rsspaper;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.webkit.WebView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 public class ItemView extends AppCompatActivity {
-    String desc;
+    String link;
     WebView view;
 
     @Override
@@ -16,9 +16,9 @@ public class ItemView extends AppCompatActivity {
         setContentView(R.layout.activity_item_view);
 
         Intent intent = getIntent();
-        desc = intent.getStringExtra("description");
+        link = intent.getStringExtra("link");
 
         view = findViewById(R.id.webview);
-        view.loadData(desc, "text/html; charset=UTF-8", null);
+        view.loadUrl(link);
     }
 }

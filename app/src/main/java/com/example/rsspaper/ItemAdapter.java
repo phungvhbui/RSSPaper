@@ -3,7 +3,6 @@ package com.example.rsspaper;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,17 +41,14 @@ public class ItemAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         convertView = inflater.inflate(R.layout.list_item, null);
-        Button btn = (Button) convertView.findViewById(R.id.button);
+        Button btn = convertView.findViewById(R.id.button);
         btn.setText(objects.get(position).getTitle());
 
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, ItemView.class);
-                intent.putExtra("description", objects.get(position).getDescription());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-            }
+        btn.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ItemView.class);
+            intent.putExtra("link", objects.get(position).getLink());
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
         });
         return convertView;
     }
