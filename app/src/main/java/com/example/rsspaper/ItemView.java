@@ -18,6 +18,8 @@ public class ItemView extends AppCompatActivity {
         Intent intent = getIntent();
         link = intent.getStringExtra("link");
 
+        getSupportActionBar().setTitle(intent.getStringExtra("title"));
+
         view = findViewById(R.id.webview);
         view.loadUrl(link);
     }

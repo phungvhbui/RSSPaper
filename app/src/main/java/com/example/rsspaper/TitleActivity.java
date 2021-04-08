@@ -30,9 +30,11 @@ public class TitleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_title);
 
-        listView = (ListView) findViewById(R.id.list_layout);
+        listView = findViewById(R.id.list_layout);
         Intent intent = getIntent();
         url = intent.getStringExtra("url");
+
+        getSupportActionBar().setTitle(intent.getStringExtra("category"));
 
         new FetchFeedTask().execute();
     }
@@ -44,6 +46,7 @@ public class TitleActivity extends AppCompatActivity {
         String description = null;
         boolean isItem = false;
         List<RSSObject> items = new ArrayList<>();
+        boolean first = true;
 
         try {
             XmlPullParser xmlPullParser = Xml.newPullParser();
@@ -82,7 +85,11 @@ public class TitleActivity extends AppCompatActivity {
                 if (name.equalsIgnoreCase("title")) {
                     title = result;
                 } else if (name.equalsIgnoreCase("link")) {
-                    link = result;
+                    if (!first) {
+                        link = result;
+                    } else {
+                        first = false;
+                    }
                 } else if (name.equalsIgnoreCase("description")) {
                     description = result;
                 }
@@ -112,12 +119,7 @@ public class TitleActivity extends AppCompatActivity {
         private String urlLink = url;
 
         @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
         protected Boolean doInBackground(Void... voids) {
-
             try {
                 if (!urlLink.startsWith("http://") && !urlLink.startsWith("https://"))
                     urlLink = "http://" + urlLink;

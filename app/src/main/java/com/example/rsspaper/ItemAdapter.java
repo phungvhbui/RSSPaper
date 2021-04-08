@@ -47,6 +47,7 @@ public class ItemAdapter extends BaseAdapter {
         btn.setOnClickListener(v -> {
             Intent intent = new Intent(context, ItemView.class);
             intent.putExtra("link", objects.get(position).getLink());
+            intent.putExtra("title", objects.get(position).getTitle());
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         });
