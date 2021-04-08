@@ -2,6 +2,7 @@ package com.example.rsspaper;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +24,8 @@ import java.util.List;
 public class TitleActivity extends AppCompatActivity {
     List<RSSObject> list;
     String url;
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
     private ListView listView;
 
     @Override
@@ -34,9 +37,31 @@ public class TitleActivity extends AppCompatActivity {
         Intent intent = getIntent();
         url = intent.getStringExtra("url");
 
+        pref = getApplicationContext().getSharedPreferences(Database.PREFS_NAME, MODE_PRIVATE);
+        editor = pref.edit();
+
+        int screenMode = pref.getInt("Application.screen", -1);
+        if (screenMode == 3) {
+            Intent intentPass = new Intent(TitleActivity.this, ItemView.class);
+            intentPass.putExtra("title", pref.getString("RSSObject.title", null));
+            intentPass.putExtra("link", pref.getString("RSSObject.link", null));
+            startActivity(intentPass);
+        }
+
         getSupportActionBar().setTitle(intent.getStringExtra("category"));
 
         new FetchFeedTask().execute();
+    }
+
+    @Override
+    public void onBackPressed() {
+        editor.putInt("Application.screen", 1);
+        editor.putString("CategoryObject.category", "");
+        editor.putString("CategoryObject.rssLink", "");
+        editor.putString("RSSObject.title", "");
+        editor.putString("RSSObject.link", "");
+        editor.apply();
+        super.onBackPressed();
     }
 
     public List<RSSObject> parseFeed(InputStream inputStream) throws XmlPullParserException,

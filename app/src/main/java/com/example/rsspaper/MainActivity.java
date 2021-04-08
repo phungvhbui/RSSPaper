@@ -1,9 +1,8 @@
 package com.example.rsspaper;
 
-import android.app.ActionBar;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
@@ -37,10 +36,40 @@ public class MainActivity extends AppCompatActivity {
 
     LinearLayout layout;
 
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        pref = getApplicationContext().getSharedPreferences(Database.PREFS_NAME, MODE_PRIVATE);
+        editor = pref.edit();
+
+        int screenMode = pref.getInt("Application.screen", -1);
+        if (screenMode == -1) {
+            editor.putInt("Application.screen", 1);
+            editor.putString("CategoryObject.category", "");
+            editor.putString("CategoryObject.rssLink", "");
+            editor.putString("RSSObject.title", "");
+            editor.putString("RSSObject.link", "");
+            editor.apply();
+        } else {
+            if (screenMode == 2) {
+                Intent intent = new Intent(MainActivity.this, TitleActivity.class);
+                intent.putExtra("url", pref.getString("CategoryObject.rssLink", null));
+                intent.putExtra("category", pref.getString("CategoryObject.category", null));
+                startActivity(intent);
+            }
+            else if(screenMode == 3){
+                Intent intent = new Intent(MainActivity.this, TitleActivity.class);
+                intent.putExtra("url", pref.getString("CategoryObject.rssLink", null));
+                intent.putExtra("category", pref.getString("CategoryObject.category", null));
+                intent.putExtra("title", pref.getString("RSSObject.title", null));
+                intent.putExtra("link", pref.getString("RSSObject.link", null));
+                startActivity(intent);
+            }
+        }
 
         getSupportActionBar().setTitle("VnExpress's categories");
 
@@ -58,6 +87,11 @@ public class MainActivity extends AppCompatActivity {
             btn.setLayoutParams(params);
             btn.setText(cat.getCategory());
             btn.setOnClickListener(v -> {
+                editor.putInt("Application.screen", 2);
+                editor.putString("CategoryObject.category", cat.getCategory());
+                editor.putString("CategoryObject.rssLink", cat.getRssLink());
+                editor.apply();
+
                 Intent intent = new Intent(MainActivity.this, TitleActivity.class);
                 intent.putExtra("url", cat.getRssLink());
                 intent.putExtra("category", cat.getCategory());
