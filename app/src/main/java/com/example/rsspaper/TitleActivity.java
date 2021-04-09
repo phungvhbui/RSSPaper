@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.Xml;
 import android.widget.ListView;
@@ -20,10 +22,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TitleActivity extends AppCompatActivity {
     List<RSSObject> list;
-    String url;
+    String url = "";
     SharedPreferences pref;
     SharedPreferences.Editor editor;
     private ListView listView;
@@ -49,8 +53,31 @@ public class TitleActivity extends AppCompatActivity {
         }
 
         getSupportActionBar().setTitle(intent.getStringExtra("category"));
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        es.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (!url.startsWith("http://") && !url.startsWith("https://"))
+                        url = "http://" + url;
 
-        new FetchFeedTask().execute();
+                    URL urlink = new URL(url);
+                    InputStream inputStream = urlink.openConnection().getInputStream();
+                    list = parseFeed(inputStream);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException | XmlPullParserException e) {
+                    e.printStackTrace();
+                }
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        final ItemAdapter adapter = new ItemAdapter(getApplicationContext(), list);
+                        listView.setAdapter(adapter);
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -135,36 +162,6 @@ public class TitleActivity extends AppCompatActivity {
             return items;
         } finally {
             inputStream.close();
-        }
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private class FetchFeedTask extends AsyncTask<Void, Void, Boolean> {
-
-        private String urlLink = url;
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            try {
-                if (!urlLink.startsWith("http://") && !urlLink.startsWith("https://"))
-                    urlLink = "http://" + urlLink;
-
-                URL url = new URL(urlLink);
-                InputStream inputStream = url.openConnection().getInputStream();
-                list = parseFeed(inputStream);
-                return true;
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException | XmlPullParserException e) {
-                e.printStackTrace();
-            }
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean success) {
-            final ItemAdapter adapter = new ItemAdapter(getApplicationContext(), list);
-            listView.setAdapter(adapter);
         }
     }
 }
